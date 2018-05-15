@@ -5,13 +5,13 @@
         <img src="../assets/logo.png"/>
         <ul class="head-nav">
           <li class="nav-pile">|</li>
-          <li>退出</li>
+          <li><a>退出</a></li>
           <li class="nav-pile">|</li>
-          <li>登录</li>
+          <li><a @click="loginDialog">登录</a></li>
           <li class="nav-pile">|</li>
-          <li>注册</li>
+          <li><a @click="registerDialog">注册</a></li>
           <li class="nav-pile">|</li>
-          <li>关于</li>
+          <li><a @click="aboutDialog">关于</a></li>
         </ul>
       </div>
     </div>
@@ -23,15 +23,45 @@
     <div class="app-foot">
       <address>天堂路十八层99栋110号房</address>
     </div>
+    <my-dialog :isShow="isShowForAboutDialog" @on-close="closeDialog('isShowForAboutDialog')">
+      <p>layout内容</p>
+    </my-dialog>
+    <my-dialog :isShow="isShowForLoginDialog" @on-close="closeDialog('isShowForLoginDialog')">
+      <p>layout内容</p>
+    </my-dialog>
+    <my-dialog :isShow="isShowForRegisterDialog" @on-close="closeDialog('isShowForRegisterDialog')">
+      <p>layout内容</p>
+    </my-dialog>
   </div>
 </template>
 
 <script>
+import Dialog from './Dialog'
+
 export default {
   name: 'Layout',
+  components: {
+    myDialog: Dialog
+  },
   data () {
     return {
-      msg: '1111111'
+      isShowForAboutDialog: false,
+      isShowForLoginDialog: false,
+      isShowForRegisterDialog: false
+    }
+  },
+  methods: {
+    aboutDialog () {
+      this.isShowForAboutDialog = true
+    },
+    loginDialog () {
+      this.isShowForLoginDialog = true
+    },
+    registerDialog () {
+      this.isShowForRegisterDialog = true
+    },
+    closeDialog (dialog) {
+      this.dialog = false
     }
   }
 }

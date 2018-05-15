@@ -3,29 +3,89 @@
     <div class="index-left">
       <div class="index-left-block">
         <h2>全部产品</h2>
-        <template v-for="product in productList">
+        <div v-for="product in productList" :key="product.title">
           <h3>{{ product.title}}</h3>
           <ul>
-            <li v-for="item in product.list">
+            <li v-for="item in product.list" :key="item.name">
               <a :href="item.url">{{ item.name }}</a>
               <span v-if="item.hot" class="hot-tag">HOT</span>
             </li>
           </ul>
           <div v-if="!product.last" class="hr"></div>
-        </template>
+        </div>
       </div>
       <div class="index-left-block lastest-news">
         <h2>最新消息</h2>
+        <ul>
+          <li v-for="news in newsList" :key="news.title">
+            <a :href="news.url" class="new-item">{{ news.title }}</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+    <div class="index-right">
+      <slide-show :slides="slides" :inv="slideSpeed" @onchange="dosomethingonchange"></slide-show>
+      <div class="index-board-list">
+        <div class="index-board-item" v-for="(board,index) in boardList" :key="board.title" :class="[{'line-last': index % 2 !== 0}, 'index-board-'+board.id]">
+          <div class="index-board-item-inner">
+            <h2>{{ board.title }}</h2>
+            <p>{{ board.description }}</p>
+            <div class="index-board-button">
+              <a href="" class="button">立即购买</a>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
 </template>
 
 <script>
+import slideShow from '../components/SlideShow'
 export default {
   name: 'index',
+  components: {
+    slideShow
+  },
+  created: function () {
+    this.$http.get('api/getNewsList').then((res) => {
+      console.log(res.data)
+      this.newsList = res.data
+    }, (err) => {
+      console.log(err)
+    })
+  },
+  methods: {
+    dosomethingonchange () {
+      console.log('dosomethingonchange run!')
+    }
+  },
   data () {
     return {
+      slideSpeed: 2000,
+      slides: [
+        {
+          src: require('../assets/slideShow/pic1.jpg'),
+          title: 'analysis',
+          href: 'detail/analysis'
+        },
+        {
+          src: require('../assets/slideShow/pic2.jpg'),
+          title: 'count',
+          href: 'detail/count'
+        },
+        {
+          src: require('../assets/slideShow/pic3.jpg'),
+          title: 'xxx3',
+          href: 'http://xxx.xxx.com'
+        },
+        {
+          src: require('../assets/slideShow/pic4.jpg'),
+          title: 'forecast',
+          href: 'detail/forecast'
+        }
+      ],
+      newsList: [],
       productList: {
         pc: {
           title: 'PC产品',
@@ -72,7 +132,37 @@ export default {
             }
           ]
         }
-      }
+      },
+      boardList: [
+        {
+          title: '开放产品',
+          description: '开放产品是一款开放产品',
+          id: 'car',
+          toKey: 'analysis',
+          saleout: false
+        },
+        {
+          title: '品牌营销',
+          description: '品牌营销帮助你的产品更好地找到定位',
+          id: 'earth',
+          toKey: 'count',
+          saleout: false
+        },
+        {
+          title: '使命必达',
+          description: '使命必达快速迭代永远保持最前端的速度',
+          id: 'loud',
+          toKey: 'forecast',
+          saleout: true
+        },
+        {
+          title: '勇攀高峰',
+          description: '帮你勇闯高峰，到达事业的顶峰',
+          id: 'hill',
+          toKey: 'publish',
+          saleout: false
+        }
+      ]
     }
   }
 }
