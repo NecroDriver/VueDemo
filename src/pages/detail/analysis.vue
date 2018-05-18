@@ -10,7 +10,7 @@
           购买数量：
         </div>
         <div class="sales-board-line-right">
-          <v-counter @on-change="onParamChange('buyNum', $event)"></v-counter>
+          <v-counter :min="0" :max="10" @on-change="onChangeParam('buyNum', $event)"></v-counter>
         </div>
       </div>
       <div class="sales-board-line">
@@ -18,7 +18,7 @@
           产品类型：
         </div>
         <div class="sales-board-line-right">
-          <v-selection :selections="buyTypes" @on-change="onParamChange('buyType', $event)"></v-selection>
+          <v-selection :selections="productTypes" @on-change="onChangeParam('productType' , $event)"></v-selection>
         </div>
       </div>
       <div class="sales-board-line">
@@ -26,9 +26,7 @@
           有效时间：
         </div>
         <div class="sales-board-line-right">
-          <v-chooser
-            :selections="periodList"
-            @on-change="onParamChange('period', $event)"></v-chooser>
+          <v-chooser :choosers="periodList" @on-change="onChangeParam('period', $event)"></v-chooser>
         </div>
       </div>
       <div class="sales-board-line">
@@ -36,9 +34,7 @@
           产品版本：
         </div>
         <div class="sales-board-line-right">
-          <v-mul-chooser
-            :selections="versionList"
-            @on-change="onParamChange('versions', $event)"></v-mul-chooser>
+          <v-multiply-chooser :choosers="versionList" @on-change="onChangeParam('versions', $event)"></v-multiply-chooser>
         </div>
       </div>
       <div class="sales-board-line">
@@ -46,13 +42,13 @@
           总价：
         </div>
         <div class="sales-board-line-right">
-          {{ price }} 元
+          {{ totalPrice }} 元
         </div>
       </div>
       <div class="sales-board-line">
         <div class="sales-board-line-left">&nbsp;</div>
         <div class="sales-board-line-right">
-          <div class="button" @click="showPayDialog">
+          <div class="button">
             立即购买
           </div>
         </div>
@@ -80,41 +76,125 @@
         <li>用户所在地理区域分布状况等</li>
       </ul>
     </div>
-    <my-dialog :is-show="isShowPayDialog" @on-close="hidePayDialog">
-      <table class="buy-dialog-table">
-        <tr>
-          <th>购买数量</th>
-          <th>产品类型</th>
-          <th>有效时间</th>
-          <th>产品版本</th>
-          <th>总价</th>
-        </tr>
-        <tr>
-          <td>{{ buyNum }}</td>
-          <td>{{ buyType.label }}</td>
-          <td>{{ period.label }}</td>
-          <td>
-            <!--<span v-for="item in versions">{{ item.label }}</span>-->
-          </td>
-          <td>{{ price }}</td>
-        </tr>
-      </table>
-      <h3 class="buy-dialog-title">请选择银行</h3>
-      <bank-chooser @on-change="onChangeBanks"></bank-chooser>
-      <div class="button buy-dialog-btn" @click="confirmBuy">
-        确认购买
-      </div>
-    </my-dialog>
-    <my-dialog :is-show="isShowErrDialog" @on-close="hideErrDialog">
-      支付失败！
-    </my-dialog>
-    <check-order :is-show-check-dialog="isShowCheckOrder" :order-id="orderId" @on-close-check-dialog="hideCheckOrder"></check-order>
+    <!--<my-dialog :is-show="isShowPayDialog" @on-close="hidePayDialog">-->
+      <!--<table class="buy-dialog-table">-->
+        <!--<tr>-->
+          <!--<th>购买数量</th>-->
+          <!--<th>产品类型</th>-->
+          <!--<th>有效时间</th>-->
+          <!--<th>产品版本</th>-->
+          <!--<th>总价</th>-->
+        <!--</tr>-->
+        <!--<tr>-->
+          <!--<td>{{ buyNum }}</td>-->
+          <!--<td>{{ buyType.label }}</td>-->
+          <!--<td>{{ period.label }}</td>-->
+          <!--<td>-->
+            <!--&lt;!&ndash;<span v-for="item in versions">{{ item.label }}</span>&ndash;&gt;-->
+          <!--</td>-->
+          <!--<td>{{ price }}</td>-->
+        <!--</tr>-->
+      <!--</table>-->
+      <!--<h3 class="buy-dialog-title">请选择银行</h3>-->
+      <!--<bank-chooser @on-change="onChangeBanks"></bank-chooser>-->
+      <!--<div class="button buy-dialog-btn" @click="confirmBuy">-->
+        <!--确认购买-->
+      <!--</div>-->
+    <!--</my-dialog>-->
+    <!--<my-dialog :is-show="isShowErrDialog" @on-close="hideErrDialog">-->
+      <!--支付失败！-->
+    <!--</my-dialog>-->
+    <!--<check-order :is-show-check-dialog="isShowCheckOrder" :order-id="orderId" @on-close-check-dialog="hideCheckOrder"></check-order>-->
   </div>
 </template>
 
 <script>
+import VSelection from '../../components/Selection'
+import VCounter from '../../components/Counter'
+import VChooser from '../../components/Chooser'
+import VMultiplyChooser from '../../components/MultiplyChooser'
+import _ from 'lodash'
+
 export default {
-  name: 'analysis'
+  name: 'analysis',
+  components: {
+    VSelection,
+    VCounter,
+    VChooser,
+    VMultiplyChooser
+  },
+  data () {
+    return {
+      buyNum: 0,
+      productType: {},
+      period: {},
+      versions: [],
+      totalPrice: 0,
+      versionList: [
+        {
+          label: '客户版',
+          value: 0
+        },
+        {
+          label: '代理商版',
+          value: 1
+        },
+        {
+          label: '专家版',
+          value: 2
+        }
+      ],
+      periodList: [
+        {
+          label: '半年',
+          value: 0
+        },
+        {
+          label: '一年',
+          value: 1
+        },
+        {
+          label: '三年',
+          value: 2
+        }
+      ],
+      productTypes: [
+        {
+          label: '生活类',
+          value: 0
+        },
+        {
+          label: '体育类',
+          value: 1
+        },
+        {
+          label: '娱乐类',
+          value: 2
+        }
+      ]
+    }
+  },
+  methods: {
+    onChangeParam (attr, val) {
+      this[attr] = val
+      this.getPrice()
+    },
+    getPrice () {
+      let versionsArray = _.map(this.versions, (item) => {
+        return item.value
+      })
+      let reqParams = {
+        buyNum: this.buyNum,
+        productType: this.productType.value,
+        period: this.period.value,
+        versions: versionsArray
+      }
+      console.log(reqParams)
+      this.$http.post('/api/getPrice', reqParams).then((res) => {
+        this.totalPrice = res.data.amount
+      })
+    }
+  }
 }
 </script>
 

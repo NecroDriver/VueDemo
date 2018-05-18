@@ -26,7 +26,7 @@
           产品版本：
         </div>
         <div class="sales-board-line-right">
-          <v-mul-chooser :selections="versionList"></v-mul-chooser>
+          <v-multiply-chooser :choosers="versionList"></v-multiply-chooser>
         </div>
       </div>
       <div class="sales-board-line">
@@ -252,8 +252,61 @@
 </template>
 
 <script>
+import VCounter from '../../components/Counter'
+import VMultiplyChooser from '../../components/MultiplyChooser'
+import VSelection from '../../components/Selection'
+
 export default {
-  name: 'publish'
+  name: 'publish',
+  components: {
+    VCounter,
+    VMultiplyChooser,
+    VSelection
+  },
+  data () {
+    return {
+      tradeList: [
+        {
+          label: '出版业',
+          value: 0
+        },
+        {
+          label: '媒体',
+          value: 1
+        },
+        {
+          label: '金融',
+          value: 2
+        },
+        {
+          label: '互联网',
+          value: 3
+        },
+        {
+          label: '游戏',
+          value: 4
+        }
+      ],
+      versionList: [
+        {
+          label: '初级版',
+          value: 0
+        },
+        {
+          label: '中级版',
+          value: 1
+        },
+        {
+          label: '高级版',
+          value: 2
+        },
+        {
+          label: '专家版',
+          value: 3
+        }
+      ]
+    }
+  }
 }
 </script>
 
