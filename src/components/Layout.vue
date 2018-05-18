@@ -2,14 +2,17 @@
   <div>
     <div class="app-head">
       <div class="app-head-inner">
-        <img src="../assets/logo.png"/>
+        <router-link :to="{path: '/'}">
+          <img src="../assets/logo.png"/>
+        </router-link>
         <ul class="head-nav">
-          <li class="nav-pile">|</li>
-          <li><a>退出</a></li>
-          <li class="nav-pile">|</li>
-          <li><a @click="loginDialog">登录</a></li>
-          <li class="nav-pile">|</li>
-          <li><a @click="registerDialog">注册</a></li>
+          <li>{{ userName }}</li>
+          <li v-if="userName !== ''" class="nav-pile">|</li>
+          <li v-if="userName !== ''"><a>退出</a></li>
+          <li v-if="userName === ''" class="nav-pile">|</li>
+          <li v-if="userName === ''"><a @click="loginDialog">登录</a></li>
+          <li v-if="userName === ''" class="nav-pile">|</li>
+          <li v-if="userName === ''"><a @click="registerDialog">注册</a></li>
           <li class="nav-pile">|</li>
           <li><a @click="aboutDialog">关于</a></li>
         </ul>
@@ -24,30 +27,35 @@
       <address>天堂路十八层99栋110号房</address>
     </div>
     <my-dialog :isShow="isShowForAboutDialog" @on-close="closeDialog('isShowForAboutDialog')">
-      <p>layout内容</p>
+      <p>如果命中注定我们在一起，请抓紧我的手别放弃，因为未来的我一定你要的以后</p>
     </my-dialog>
     <my-dialog :isShow="isShowForLoginDialog" @on-close="closeDialog('isShowForLoginDialog')">
-      <p>layout内容</p>
+      <login-form @has-log="onSuccessLog"></login-form>
     </my-dialog>
     <my-dialog :isShow="isShowForRegisterDialog" @on-close="closeDialog('isShowForRegisterDialog')">
-      <p>layout内容</p>
+      <register-form></register-form>
     </my-dialog>
   </div>
 </template>
 
 <script>
 import Dialog from './Dialog'
+import LoginForm from './LoginForm'
+import RegisterForm from './RegisterForm'
 
 export default {
   name: 'Layout',
   components: {
-    myDialog: Dialog
+    myDialog: Dialog,
+    LoginForm,
+    RegisterForm
   },
   data () {
     return {
       isShowForAboutDialog: false,
       isShowForLoginDialog: false,
-      isShowForRegisterDialog: false
+      isShowForRegisterDialog: false,
+      userName: ''
     }
   },
   methods: {
@@ -60,8 +68,12 @@ export default {
     registerDialog () {
       this.isShowForRegisterDialog = true
     },
-    closeDialog (dialog) {
-      this.dialog = false
+    closeDialog (attr) {
+      this[attr] = false
+    },
+    onSuccessLog (data) {
+      this.userName = data.username
+      this.closeDialog('isShowForLoginDialog')
     }
   }
 }

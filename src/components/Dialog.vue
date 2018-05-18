@@ -1,11 +1,13 @@
 <template>
   <div>
-    <div class="dialog-wrap" v-if="isShow">
-      <div class="dialog-cover" @click="closeDialog"></div>
-      <div class="dialog-content">
-        <div class="dialog-close" @click="closeDialog">×</div>
-        <slot>插槽</slot>
-      </div>
+    <div class="dialog-wrap">
+      <div class="dialog-cover" @click="closeDialog" v-if="isShow"></div>
+      <transition name="drop">
+        <div class="dialog-content" v-if="isShow">
+          <div class="dialog-close" @click="closeDialog">×</div>
+          <slot>插槽</slot>
+        </div>
+      </transition>
     </div>
   </div>
 </template>
