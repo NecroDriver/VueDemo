@@ -2,6 +2,7 @@ import Vue from 'vue'
 import Router from 'vue-router'
 import indexPage from '../pages/index'
 import detailPage from '../pages/detail'
+import orderPage from '../pages/orderList'
 import analysisPage from '../pages/detail/analysis'
 import countPage from '../pages/detail/count'
 import forecastPage from '../pages/detail/forecast'
@@ -15,6 +16,10 @@ export default new Router({
     {
       path: '/',
       component: indexPage
+    },
+    {
+      path: '/orderList',
+      component: orderPage
     },
     {
       path: '/detail',

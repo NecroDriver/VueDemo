@@ -39,7 +39,7 @@
 </template>
 
 <script>
-import Dialog from './Dialog'
+import Dialog from './base/Dialog'
 import LoginForm from './LoginForm'
 import RegisterForm from './RegisterForm'
 

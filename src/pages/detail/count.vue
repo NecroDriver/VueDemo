@@ -244,8 +244,8 @@
 </template>
 
 <script>
-import VChooser from '../../components/Chooser'
-import VSelection from '../../components/Selection'
+import VChooser from '../../components/base/Chooser'
+import VSelection from '../../components/base/Selection'
 
 export default {
   name: 'count',

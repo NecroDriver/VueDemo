@@ -58,8 +58,8 @@
 </template>
 
 <script>
-import VMultiplyChooser from '../../components/MultiplyChooser'
-import VCounter from '../../components/Counter'
+import VMultiplyChooser from '../../components/base/MultiplyChooser'
+import VCounter from '../../components/base/Counter'
 
 export default {
   name: 'forecast',

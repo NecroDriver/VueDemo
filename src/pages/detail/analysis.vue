@@ -48,7 +48,7 @@
       <div class="sales-board-line">
         <div class="sales-board-line-left">&nbsp;</div>
         <div class="sales-board-line-right">
-          <div class="button">
+          <div class="button" @click="showPayDialog">
             立即购买
           </div>
         </div>
@@ -76,43 +76,42 @@
         <li>用户所在地理区域分布状况等</li>
       </ul>
     </div>
-    <!--<my-dialog :is-show="isShowPayDialog" @on-close="hidePayDialog">-->
-      <!--<table class="buy-dialog-table">-->
-        <!--<tr>-->
-          <!--<th>购买数量</th>-->
-          <!--<th>产品类型</th>-->
-          <!--<th>有效时间</th>-->
-          <!--<th>产品版本</th>-->
-          <!--<th>总价</th>-->
-        <!--</tr>-->
-        <!--<tr>-->
-          <!--<td>{{ buyNum }}</td>-->
-          <!--<td>{{ buyType.label }}</td>-->
-          <!--<td>{{ period.label }}</td>-->
-          <!--<td>-->
-            <!--&lt;!&ndash;<span v-for="item in versions">{{ item.label }}</span>&ndash;&gt;-->
-          <!--</td>-->
-          <!--<td>{{ price }}</td>-->
-        <!--</tr>-->
-      <!--</table>-->
-      <!--<h3 class="buy-dialog-title">请选择银行</h3>-->
-      <!--<bank-chooser @on-change="onChangeBanks"></bank-chooser>-->
-      <!--<div class="button buy-dialog-btn" @click="confirmBuy">-->
-        <!--确认购买-->
-      <!--</div>-->
-    <!--</my-dialog>-->
-    <!--<my-dialog :is-show="isShowErrDialog" @on-close="hideErrDialog">-->
-      <!--支付失败！-->
-    <!--</my-dialog>-->
-    <!--<check-order :is-show-check-dialog="isShowCheckOrder" :order-id="orderId" @on-close-check-dialog="hideCheckOrder"></check-order>-->
+    <v-dialog :is-show="isShowPayDialog" @on-close="hidePayDialog">
+      <table class="buy-dialog-table">
+        <tr>
+          <th>购买数量</th>
+          <th>产品类型</th>
+          <th>有效时间</th>
+          <th>产品版本</th>
+          <th>总价</th>
+        </tr>
+        <tr>
+          <td>{{ buyNum }}</td>
+          <td>{{ productType.label }}</td>
+          <td>{{ period.label }}</td>
+          <td>
+            &lt;&ndash;<span v-for="item in versions" :key="item.label">{{ item.label }}</span>&ndash;&gt;
+          </td>
+          <td>{{ totalPrice }}</td>
+        </tr>
+      </table>
+      <h3 class="buy-dialog-title">请选择银行</h3>
+      <bank-chooser @on-change="onChangeBanks"></bank-chooser>
+      <div class="button buy-dialog-btn" @click="confirmBuy">确认购买</div>
+    </v-dialog>
+    <v-dialog :is-show="isShowErrDialog" @on-close="hideErrDialog">支付失败！</v-dialog>
+    <check-order :is-show-check-dialog="isShowCheckDialog" :order-id="orderId" @on-close-check-dialog="hideCheckDialog"></check-order>
   </div>
 </template>
 
 <script>
-import VSelection from '../../components/Selection'
-import VCounter from '../../components/Counter'
-import VChooser from '../../components/Chooser'
-import VMultiplyChooser from '../../components/MultiplyChooser'
+import VSelection from '../../components/base/Selection'
+import VCounter from '../../components/base/Counter'
+import VChooser from '../../components/base/Chooser'
+import VMultiplyChooser from '../../components/base/MultiplyChooser'
+import VDialog from '../../components/base/Dialog'
+import BankChooser from '../../components/BankChooser'
+import CheckOrder from '../../components/CheckDialog'
 import _ from 'lodash'
 
 export default {
@@ -121,7 +120,10 @@ export default {
     VSelection,
     VCounter,
     VChooser,
-    VMultiplyChooser
+    VMultiplyChooser,
+    VDialog,
+    BankChooser,
+    CheckOrder
   },
   data () {
     return {
@@ -130,6 +132,11 @@ export default {
       period: {},
       versions: [],
       totalPrice: 0,
+      isShowPayDialog: false,
+      isShowCheckDialog: false,
+      isShowErrDialog: false,
+      bankId: null,
+      orderId: null,
       versionList: [
         {
           label: '客户版',
@@ -187,17 +194,80 @@ export default {
         buyNum: this.buyNum,
         productType: this.productType.value,
         period: this.period.value,
-        versions: versionsArray
+        versions: versionsArray.join(',')
       }
-      console.log(reqParams)
       this.$http.post('/api/getPrice', reqParams).then((res) => {
         this.totalPrice = res.data.amount
       })
+    },
+    hidePayDialog () {
+      this.isShowPayDialog = false
+    },
+    showPayDialog () {
+      this.isShowPayDialog = true
+    },
+    hideErrDialog () {
+      this.isShowErrDialog = false
+    },
+    hideCheckDialog () {
+      this.isShowCheckDialog = false
+    },
+    onChangeBanks (bank) {
+      this.bankId = bank.id
+    },
+    confirmBuy () {
+      let versionsArray = _.map(this.versions, (item) => {
+        return item.value
+      })
+      let reqParams = {
+        buyNum: this.buyNum,
+        productType: this.productType.value,
+        period: this.period.value,
+        versions: versionsArray.join(','),
+        bankId: this.bankId
+      }
+      this.$http.post('/api/createOrder', reqParams).then((res) => {
+        this.orderId = res.data.orderId
+        this.isShowPayDialog = false
+        this.isShowCheckDialog = true
+      }, () => {
+        this.isShowPayDialog = false
+        this.isShowErrDialog = true
+      })
     }
+  },
+  mounted () {
+  //  页面渲染完成
+    this.buyNum = 0
+    this.productType = this.productTypes[0]
+    this.period = this.periodList[0]
+    this.versions = [this.versionList[0]]
+    this.getPrice()
   }
 }
 </script>
 
 <style scoped>
-
+  .buy-dialog-title {
+    font-size: 16px;
+    font-weight: bold;
+  }
+  .buy-dialog-btn {
+    margin-top: 20px;
+  }
+  .buy-dialog-table {
+    width: 100%;
+    margin-bottom: 20px;
+  }
+  .buy-dialog-table td,
+  .buy-dialog-table th{
+    border: 1px solid #e3e3e3;
+    text-align: center;
+    padding: 5px 0;
+  }
+  .buy-dialog-table th {
+    background: #4fc08d;
+    color: #fff;
+    border: 1px solid #4fc08d;
+  }
 </style>
